@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Slide - Gerador de Slides com IA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilos personalizados */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Efeitos de transição para botões e links */
+        .btn-primary {
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .hero-bg {
+            background-image: linear-gradient(135deg, #eef2ff 0%, #d2d6f9 100%);
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+        
+        #fullscreen-view {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #f3f4f6;
+            z-index: 1000;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .fullscreen-slide {
+            width: 90%;
+            max-width: 1200px;
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 4rem;
+            text-align: center;
+            border-radius: 1.5rem;
+            transition: transform 0.5s ease-in-out;
+            transform-origin: center center;
+            overflow-y: auto;
+        }
+
+        .controls-hidden {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col justify-between">
+
+    <header class="bg-white shadow-md py-4">
+        <div class="container mx-auto px-4">
+            <nav class="flex justify-between items-center">
+                <a href="#" class="text-2xl sm:text-3xl font-extrabold text-gray-900">AI Slide</a>
+                <a href="#demo" class="text-gray-600 font-semibold hover:text-blue-600 transition-colors">Demonstração</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow flex items-center justify-center hero-bg">
+        <div class="container mx-auto p-8 max-w-4xl text-center">
+            <h1 class="text-4xl sm:text-6xl font-extrabold text-gray-900 leading-tight mb-4">Crie Apresentações Incríveis em Segundos</h1>
+            <p class="text-lg sm:text-xl text-gray-600 mb-8">AI Slide é a ferramenta definitiva para gerar slides minimalistas e elegantes com o poder da inteligência artificial. Basta um tópico e nós fazemos o resto.</p>
+            <a href="#demo" class="btn-primary bg-blue-600 text-white font-semibold py-4 px-10 rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500">Começar Agora</a>
+        </div>
+    </main>
+
+    <section id="how-it-works" class="bg-white rounded-3xl shadow-xl p-8 max-w-4xl w-full mx-auto my-12">
+        <h2 class="text-3xl sm:text-4xl font-bold text-center mb-6 text-gray-800">Como Funciona</h2>
+        <div class="grid md:grid-cols-3 gap-8 text-center">
+            <div class="p-4 rounded-xl bg-gray-50 shadow-sm flex flex-col items-center">
+                <div class="w-16 h-16 flex items-center justify-center bg-blue-100 text-blue-600 rounded-full mb-4">
+                    <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold mb-2">1. Insira seu Tópico</h3>
+                <p class="text-gray-600">Digite o tema da sua apresentação no campo de texto da demonstração. Seja específico para melhores resultados.</p>
+            </div>
+            <div class="p-4 rounded-xl bg-gray-50 shadow-sm flex flex-col items-center">
+                <div class="w-16 h-16 flex items-center justify-center bg-green-100 text-green-600 rounded-full mb-4">
+                    <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold mb-2">2. Gere os Slides</h3>
+                <p class="text-gray-600">Clique em "Gerar Slides". Nossa IA irá analisar seu tópico e criar o conteúdo de cada slide em segundos.</p>
+            </div>
+            <div class="p-4 rounded-xl bg-gray-50 shadow-sm flex flex-col items-center">
+                <div class="w-16 h-16 flex items-center justify-center bg-purple-100 text-purple-600 rounded-full mb-4">
+                    <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-5m0 0v-5m0 5h5m-5 0H4m5 0h5m-5 0H9m5 0v5m0-5h5m-5 0H9m-5 0v5m0-5h5m-5 0H4" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold mb-2">3. Apresente ou Baixe</h3>
+                <p class="text-gray-600">Use o modo de tela cheia para apresentar ou baixe o PDF para compartilhar facilmente com seu público.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="demo" class="bg-white rounded-3xl shadow-xl p-8 max-w-4xl w-full mx-auto my-12">
+        <h2 class="text-3xl sm:text-4xl font-bold text-center mb-6 text-gray-800">Demonstração Funcional</h2>
+        <p class="text-center text-gray-600 mb-8">Digite um tópico abaixo e veja a IA criar o conteúdo de slides minimalistas para você.</p>
+
+        <div class="mb-6">
+            <textarea
+                id="promptInput"
+                class="w-full h-32 p-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 resize-none text-gray-800"
+                placeholder="Ex: 'Introdução à Inteligência Artificial', 'A importância da energia solar'..."
+            ></textarea>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4 mb-8">
+            <button
+                id="generateBtn"
+                class="btn-primary bg-blue-600 text-white font-semibold py-3 px-8 rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+                Gerar Slides
+            </button>
+            <div id="statusMessage" class="flex items-center text-gray-500 font-medium">
+                <svg id="loadingIcon" class="hidden animate-spin h-5 w-5 mr-3 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span id="statusText"></span>
+            </div>
+        </div>
+
+        <div id="actionButtons" class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4 mt-6">
+            <button
+                id="fullscreenBtn"
+                class="btn-primary bg-purple-600 text-white font-semibold py-2 px-6 rounded-full shadow-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 hidden"
+            >
+                Modo de Tela Cheia
+            </button>
+            <button
+                id="downloadPdfBtn"
+                class="btn-primary bg-green-600 text-white font-semibold py-2 px-6 rounded-full shadow-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 hidden"
+            >
+                Baixar PDF
+                <span class="ml-2 px-2 py-0.5 text-xs font-bold text-green-700 bg-green-200 rounded-full">Beta</span>
+            </button>
+        </div>
+
+        <div id="slidesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+            </div>
+    </section>
+
+    <footer class="bg-gray-800 text-white py-6 mt-auto">
+        <div class="container mx-auto px-4 text-center">
+            <p>&copy; 2025 AI Slide. Todos os direitos reservados. Feito por M&A</p>
+        </div>
+    </footer>
+
+    <div id="fullscreen-view">
+        <div class="relative w-full h-full flex items-center justify-center">
+            <div id="fullscreenControls" class="absolute inset-0 flex items-center justify-between transition-opacity duration-500">
+                <button id="prevBtn" class="absolute left-4 z-10 text-white bg-gray-800 rounded-full p-2 hover:bg-gray-700 focus:outline-none">
+                    <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+                <button id="nextBtn" class="absolute right-4 z-10 text-white bg-gray-800 rounded-full p-2 hover:bg-gray-700 focus:outline-none">
+                    <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+                <button id="exitFullscreenBtn" class="absolute top-4 right-4 z-20 text-white bg-gray-800 rounded-full p-2 hover:bg-gray-700 focus:outline-none">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+                <span id="slideCounter" class="absolute bottom-4 left-1/2 -translate-x-1/2 text-white bg-gray-800 rounded-full px-4 py-1"></span>
+            </div>
+            <div id="slides-carousel" class="relative w-full h-full flex items-center justify-center overflow-hidden">
+                </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Seletores para os elementos do DOM
+            const promptInput = document.getElementById('promptInput');
+            const generateBtn = document.getElementById('generateBtn');
+            const statusMessage = document.getElementById('statusMessage');
+            const loadingIcon = document.getElementById('loadingIcon');
+            const statusText = document.getElementById('statusText');
+            const slidesContainer = document.getElementById('slidesContainer');
+            const fullscreenBtn = document.getElementById('fullscreenBtn');
+            const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+            const exitFullscreenBtn = document.getElementById('exitFullscreenBtn');
+            const fullscreenView = document.getElementById('fullscreen-view');
+            const slidesCarousel = document.getElementById('slides-carousel');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const slideCounter = document.getElementById('slideCounter');
+            const fullscreenControls = document.getElementById('fullscreenControls');
+
+            // Sua chave de API real foi inserida aqui.
+            const API_KEY = "AIzaSyC3A5QlSSiQ1_8Am2HwzpMz-NojW-0hL-s";
+            
+            let slideData = [];
+            let currentSlideIndex = 0;
+            let controlsTimeout;
+
+            // Temas de cores para os slides
+            const colorThemes = [
+                { bg: 'bg-blue-100', text: 'text-blue-900', border: 'border-blue-200' },
+                { bg: 'bg-green-100', text: 'text-green-900', border: 'border-green-200' },
+                { bg: 'bg-yellow-100', text: 'text-yellow-900', border: 'border-yellow-200' },
+                { bg: 'bg-purple-100', text: 'text-purple-900', border: 'border-purple-200' },
+                { bg: 'bg-red-100', text: 'text-red-900', border: 'border-red-200' }
+            ];
+            
+            const generateSlides = async () => {
+                const prompt = promptInput.value.trim();
+                if (!prompt) {
+                    statusText.textContent = "Por favor, digite um tópico para gerar os slides.";
+                    return;
+                }
+                slidesContainer.innerHTML = '';
+                generateBtn.disabled = true;
+                generateBtn.textContent = 'Gerando...';
+                loadingIcon.classList.remove('hidden');
+                statusText.textContent = 'Aguarde, a IA está trabalhando...';
+                fullscreenBtn.classList.add('hidden');
+                downloadPdfBtn.classList.add('hidden');
+                slideData = [];
+
+                try {
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+                    const textPayload = {
+                        contents: [{
+                            parts: [
+                                { text: `Crie o conteúdo de slides minimalistas e menos detalhados com base no seguinte tópico: "${prompt}". Para cada slide, forneça um título e 1 a 2 pontos-chave. Separe cada slide com duas quebras de linha. Responda apenas com o texto, sem formatação extra como asteriscos ou cabeçalhos.` }
+                            ]
+                        }]
+                    };
+                    const textResponse = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(textPayload)
+                    });
+                    if (!textResponse.ok) {
+                        throw new Error(`Erro ao gerar o texto dos slides.`);
+                    }
+                    const textResult = await textResponse.json();
+                    const responseText = textResult.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (!responseText) {
+                        statusText.textContent = 'A API não retornou conteúdo de texto. Tente um tópico diferente.';
+                        return;
+                    }
+                    const cleanedText = responseText.replace(/\*/g, '').trim();
+                    const slideContents = cleanedText.split('\n\n').filter(p => p.trim() !== '');
+                    if (slideContents.length === 0) {
+                        statusText.textContent = 'Nenhum slide foi gerado. Tente um tópico diferente.';
+                        return;
+                    }
+                    statusText.textContent = 'Texto gerado, agora exibindo os slides...';
+                    slideContents.forEach((content, index) => {
+                        const lines = content.split('\n');
+                        const title = lines[0]; // Removido o fallback 'Slide ${index + 1}'
+                        const body = lines.slice(1).join('\n');
+                        const theme = colorThemes[index % colorThemes.length];
+                        slideData.push({ title, body, theme });
+                        const slideElement = document.createElement('div');
+                        slideElement.className = `bg-gray-50 border border-gray-200 rounded-xl shadow-sm p-6 flex flex-col justify-between presentation-slide ${theme.bg} ${theme.text}`;
+                        slideElement.innerHTML = `
+                            <div class="mb-4 w-full h-full flex flex-col items-center justify-center text-center">
+                                <h3 class="text-2xl sm:text-3xl font-bold mb-4">${title}</h3>
+                                <div class="text-base sm:text-xl leading-relaxed whitespace-pre-wrap">${body}</div>
+                            </div>
+                        `;
+                        slidesContainer.appendChild(slideElement);
+                    });
+                    statusText.textContent = 'Slides gerados com sucesso!';
+                    fullscreenBtn.classList.remove('hidden');
+                    downloadPdfBtn.classList.remove('hidden');
+                } catch (error) {
+                    console.error('Erro na requisição:', error);
+                    statusText.textContent = `Erro: ${error.message}`;
+                    slidesContainer.innerHTML = `<div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert"><p class="font-bold">Erro</p><p>${error.message}</p></div>`;
+                } finally {
+                    generateBtn.disabled = false;
+                    generateBtn.textContent = 'Gerar Slides';
+                    loadingIcon.classList.add('hidden');
+                }
+            };
+            const hideControls = () => {
+                fullscreenControls.classList.add('controls-hidden');
+            };
+            const showControls = () => {
+                clearTimeout(controlsTimeout);
+                fullscreenControls.classList.remove('controls-hidden');
+                controlsTimeout = setTimeout(hideControls, 2000);
+            };
+            const enterFullscreenMode = () => {
+                if (slideData.length === 0) return;
+                slidesCarousel.innerHTML = '';
+                slideData.forEach((slide, index) => {
+                    const slideElement = document.createElement('div');
+                    slideElement.className = `fullscreen-slide absolute top-0 left-0 w-full p-8 md:p-20 flex-col items-center justify-center transition-all duration-500 ${slide.theme.bg} ${slide.theme.text}`;
+                    slideElement.style.display = 'none';
+                    slideElement.innerHTML = `
+                        <h2 class="text-4xl sm:text-6xl font-extrabold mb-8">${slide.title}</h2>
+                        <p class="text-xl sm:text-3xl leading-relaxed whitespace-pre-wrap">${slide.body}</p>
+                    `;
+                    slidesCarousel.appendChild(slideElement);
+                });
+                fullscreenView.style.display = 'flex';
+                currentSlideIndex = 0;
+                showCurrentSlide();
+                showControls();
+            };
+            const showCurrentSlide = () => {
+                const slides = slidesCarousel.querySelectorAll('.fullscreen-slide');
+                slides.forEach((slide, index) => {
+                    slide.style.display = (index === currentSlideIndex) ? 'flex' : 'none';
+                });
+                slideCounter.textContent = `${currentSlideIndex + 1} de ${slideData.length}`;
+                prevBtn.disabled = currentSlideIndex === 0;
+                nextBtn.disabled = currentSlideIndex === slideData.length - 1;
+            };
+            const exitFullscreenMode = () => {
+                fullscreenView.style.display = 'none';
+                clearTimeout(controlsTimeout);
+            };
+            const handleNavigation = (direction) => {
+                if (direction === 'next' && currentSlideIndex < slideData.length - 1) {
+                    currentSlideIndex++;
+                } else if (direction === 'prev' && currentSlideIndex > 0) {
+                    currentSlideIndex--;
+                }
+                showCurrentSlide();
+            };
+            const downloadPdf = async () => {
+                if (slideData.length === 0) {
+                    alert("Nenhum slide para baixar.");
+                    return;
+                }
+                downloadPdfBtn.textContent = 'Preparando PDF...';
+                downloadPdfBtn.disabled = true;
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('l', 'mm', 'a4');
+                
+                const tempContainer = document.createElement('div');
+                tempContainer.style.position = 'absolute';
+                tempContainer.style.top = '-9999px';
+                tempContainer.style.left = '-9999px';
+                tempContainer.style.width = '100vw';
+                tempContainer.style.height = '100vh';
+                tempContainer.style.overflow = 'hidden';
+                document.body.appendChild(tempContainer);
+
+                for (let i = 0; i < slideData.length; i++) {
+                    const slide = slideData[i];
+                    
+                    const slideElement = document.createElement('div');
+                    slideElement.className = `fullscreen-slide w-full h-full p-8 md:p-20 flex-col items-center justify-center ${slide.theme.bg} ${slide.theme.text}`;
+                    slideElement.innerHTML = `
+                        <h2 class="text-4xl sm:text-6xl font-extrabold mb-8">${slide.title}</h2>
+                        <p class="text-xl sm:text-3xl leading-relaxed whitespace-pre-wrap">${slide.body}</p>
+                    `;
+                    tempContainer.appendChild(slideElement);
+                    
+                    const canvas = await html2canvas(slideElement, {
+                        scale: 2,
+                        logging: true,
+                        useCORS: true
+                    });
+                    
+                    const imgData = canvas.toDataURL('image/png');
+                    const imgWidth = 277;
+                    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                    
+                    if (i > 0) {
+                        doc.addPage();
+                    }
+                    doc.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+                    tempContainer.removeChild(slideElement);
+                }
+                
+                document.body.removeChild(tempContainer);
+
+                doc.save('slides-ai-slide.pdf');
+                downloadPdfBtn.textContent = 'Baixar PDF';
+                downloadPdfBtn.disabled = false;
+            };
+            const handleKeyDown = (e) => {
+                if (fullscreenView.style.display === 'flex') {
+                    if (e.key === 'ArrowRight') {
+                        handleNavigation('next');
+                    } else if (e.key === 'ArrowLeft') {
+                        handleNavigation('prev');
+                    }
+                }
+            };
+            generateBtn.addEventListener('click', generateSlides);
+            fullscreenBtn.addEventListener('click', enterFullscreenMode);
+            downloadPdfBtn.addEventListener('click', downloadPdf);
+            exitFullscreenBtn.addEventListener('click', exitFullscreenMode);
+            prevBtn.addEventListener('click', () => handleNavigation('prev'));
+            nextBtn.addEventListener('click', () => handleNavigation('next'));
+            document.addEventListener('keydown', handleKeyDown);
+            fullscreenView.addEventListener('mousemove', showControls);
+            fullscreenView.addEventListener('touchmove', showControls);
+        });
+    </script>
+</body>
+</html>
