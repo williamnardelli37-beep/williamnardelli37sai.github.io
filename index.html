@@ -3,363 +3,935 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Slides com IA</title>
-    <!-- Inclui o Tailwind CSS via CDN para um estilo moderno e responsivo -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Gerenciador de Itens - Livraria Só Ler</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    
     <style>
-        /* Define a fonte Inter para todo o corpo do documento */
+        /* Variáveis de Cores e Estilo */
+        :root {
+            --bg-color-light: #f8f8f8;
+            --container-bg-light: rgba(255, 255, 255, 0.6);
+            --primary-color-light: rgba(51, 51, 51, 0.7);
+            --primary-hover-light: rgba(26, 26, 26, 0.8);
+            --danger-color-light: rgba(217, 83, 79, 0.7);
+            --danger-hover-light: rgba(201, 48, 44, 0.8);
+            --success-color-light: rgba(92, 184, 92, 0.7);
+            --success-hover-light: rgba(76, 174, 76, 0.8);
+            --text-color-light: #333333;
+            --text-light-color-light: #777777;
+            --heading-color-light: #000000;
+            --border-color-light: rgba(0, 0, 0, 0.1);
+            --shadow-light: 0 4px 15px rgba(0, 0, 0, 0.05);
+            --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.15);
+            --border-radius: 20px;
+            --button-border-radius: 12px;
+            --input-bg-light: rgba(255, 255, 255, 0.4);
+
+            --toggle-bg-color-checked: #34c759;
+            --toggle-circle-color: #ffffff;
+            --toggle-shadow-light: 0 1px 3px rgba(0, 0, 0, 0.2);
+            --toggle-bg-color-dark: #3a3a3c;
+            --toggle-shadow-dark: 0 1px 3px rgba(0, 0, 0, 0.4);
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
-        }
-
-        /* Estiliza os botões para um visual mais agradável */
-        .btn-primary {
-            transition: all 0.3s ease;
-        }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Animação de rotação para o ícone de carregamento */
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        .animate-spin {
-            animation: spin 1s linear infinite;
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background-color 0.5s ease, color 0.5s ease;
+            background: linear-gradient(135deg, #e0eafc, #cfdef3);
         }
         
-        /* Estilo para a visualização em tela cheia */
-        #fullscreen-view {
-            display: none;
+        body.light-mode {
+            background-color: var(--bg-color-light);
+            color: var(--text-color-light);
+        }
+        body.light-mode .card {
+            background: var(--container-bg-light);
+            box-shadow: var(--shadow-light);
+            border: 1px solid var(--border-color-light);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        body.light-mode input, body.light-mode select {
+            background-color: var(--input-bg-light);
+            border-color: var(--border-color-light);
+            color: var(--text-color-light);
+        }
+        body.light-mode input:focus, body.light-mode select:focus {
+            border-color: var(--primary-color-light);
+        }
+        body.light-mode button {
+            background-color: var(--primary-color-light);
+            color: white;
+        }
+        body.light-mode button:hover {
+            background-color: var(--primary-hover-light);
+            box-shadow: var(--shadow-hover);
+        }
+        body.light-mode button.remover {
+            background-color: var(--danger-color-light);
+        }
+        body.light-mode button.remover:hover {
+            background-color: var(--danger-hover-light);
+        }
+        body.light-mode #botao-imprimir-cupom {
+            background-color: var(--success-color-light);
+        }
+        body.light-mode #botao-imprimir-cupom:hover {
+            background-color: var(--success-hover-light);
+        }
+        body.light-mode .total-display {
+            color: var(--text-color-light);
+        }
+        body.light-mode .carrinho-item strong, body.light-mode h2, body.light-mode h3 {
+            color: var(--heading-color-light);
+        }
+        body.light-mode li {
+            border-bottom: 1px solid var(--border-color-light);
+        }
+        body.light-mode .total-container {
+            border-top: 1px solid var(--border-color-light);
+        }
+        body.light-mode .mode-label {
+            color: var(--text-color-light);
+        }
+        body.light-mode .promo-card {
+            background: rgba(255, 255, 255, 0.8);
+        }
+        body.light-mode .promo-btn {
+            background-color: var(--success-color-light);
+            color: white;
+        }
+        body.light-mode .promo-btn:hover {
+            background-color: var(--success-hover-light);
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+            max-width: 1200px;
+            padding: 25px;
+            margin: 25px auto;
+            flex: 1;
+        }
+        
+        @media (min-width: 992px) {
+            .container {
+                grid-template-columns: 3fr 1fr;
+            }
+        }
+
+        .card {
+            padding: 30px;
+            border-radius: var(--border-radius);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.5s ease, border-color 0.5s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+        }
+
+        h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5em;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin: 0;
+            padding-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: color 0.5s ease;
+        }
+
+        .h2-text {
+            border-bottom: 1px solid var(--border-color);
+            flex-grow: 1;
+        }
+
+        h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5em;
+            font-weight: 400;
+            letter-spacing: 1px;
+            margin: 0;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            padding: 20px 0;
+            transition: border-bottom 0.5s ease;
+        }
+        
+        li:last-child {
+            border-bottom: none;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .form-row > * {
+            flex-grow: 1;
+            min-width: 150px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color-light);
+            border-radius: var(--button-border-radius);
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1em;
+            transition: border-color 0.5s ease, background-color 0.5s ease, color 0.5s ease;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+        }
+
+        button {
+            border: none;
+            padding: 15px 25px;
+            border-radius: var(--button-border-radius);
+            cursor: pointer;
+            transition: background-color 0.5s ease, transform 0.1s ease, box-shadow 0.2s ease, color 0.5s ease;
+            font-weight: 600;
+            font-size: 1em;
+            width: 100%;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .mode-label {
+            font-size: 0.8em;
+            font-weight: 500;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button.remover {
+            flex-basis: 100px;
+            padding: 12px 15px;
+            letter-spacing: normal;
+        }
+        
+        .carrinho-item {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: flex-start;
+        }
+        
+        @media (min-width: 600px) {
+            .carrinho-item {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+
+        .carrinho-info {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex: 1;
+        }
+        
+        .carrinho-item strong {
+            font-size: 1.1em;
+            transition: color 0.5s ease;
+        }
+        
+        .carrinho-info-valor {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .carrinho-info-valor input {
+            width: 100px;
+            text-align: right;
+            padding: 8px;
+        }
+
+        .total-container {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-top: 25px;
+            padding-top: 20px;
+        }
+
+        .total-display {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5em; 
+            font-weight: 700; 
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            transition: color 0.5s ease;
+        }
+
+        .total-display strong {
+            font-weight: 700;
+        }
+        
+        .botoes-manual {
+            display: flex;
+            gap: 15px;
+            flex-direction: column;
+        }
+        
+        @media (min-width: 600px) {
+            .botoes-manual {
+                flex-direction: row;
+            }
+        }
+        
+        .botoes-manual button {
+            flex: 1;
+        }
+        
+        #instrucoes {
+            font-size: 0.9em;
+            color: var(--text-light-color-light);
+            margin-top: 10px;
+            font-style: italic;
+            transition: color 0.5s ease;
+        }
+
+        .total-item-valores {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .total-item-valores span {
+            font-size: 0.9em;
+            color: var(--text-light-color-light);
+            transition: color 0.5s ease;
+        }
+
+        .total-item-valores strong {
+            color: var(--text-color-light);
+            transition: color 0.5s ease;
+        }
+        
+        .footer-text {
+            text-align: center;
+            margin-top: 30px;
+            padding: 10px 0;
+            color: var(--text-light-color-light);
+            font-size: 0.8em;
+            transition: color 0.5s ease;
+        }
+
+        .cupom-header { text-align: center; margin-bottom: 10px; }
+        .cupom-header p { margin: 0; font-family: 'Poppins', monospace; }
+        .cupom-item { border-bottom: 1px dotted #ccc; padding: 3px 0; }
+        .cupom-total { border-top: 1px solid #000; margin-top: 10px; padding-top: 5px; }
+        .cupom-total .linha { display: flex; justify-content: space-between; }
+        .aviso { text-align: center; margin-top: 15px; font-size: 10px; }
+        #barcode { display: block; margin: 10px auto; width: 100%; }
+        
+        #floating-message {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: rgba(30, 30, 30, 0.6);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 0.9em;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-family: 'Poppins', sans-serif;
+            pointer-events: none; /* Para não interferir em cliques */
+        }
+        
+        #lock-screen {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #f3f4f6;
-            z-index: 1000;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .fullscreen-slide {
-            width: 90%;
-            max-width: 1200px;
-            min-height: 80vh;
+            background-color: rgba(0, 0, 0, 0.9);
+            color: white;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 4rem;
+            z-index: 2000;
             text-align: center;
-            border-radius: 1.5rem;
-            transition: transform 0.5s ease-in-out;
-            transform-origin: center center;
-            overflow-y: auto; /* Permite a rolagem se o conteúdo for muito longo */
+        }
+        
+        #lock-screen h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3em;
+            margin-bottom: 20px;
         }
 
-        /* Classe para esconder os controles */
-        .controls-hidden {
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.5s ease-out;
+        #lock-screen p {
+            font-size: 1.2em;
+            margin-bottom: 30px;
         }
+
+        #lock-screen input {
+            padding: 12px 20px;
+            font-size: 1em;
+            border-radius: 8px;
+            border: none;
+            width: 250px;
+            margin-bottom: 20px;
+        }
+
+        #lock-screen button {
+            padding: 12px 25px;
+            font-size: 1.1em;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        #lock-screen button:hover {
+            background-color: #45a049;
+        }
+        
+        .promo-card {
+            text-align: center;
+            padding: 20px;
+            margin-top: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .promo-card h3 {
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .promo-card p {
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+        
+        .promo-btn {
+            display: inline-block;
+            padding: 12px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
     </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+<body class="light-mode">
 
-    <!-- Container principal para o aplicativo -->
-    <div id="mainContainer" class="bg-white rounded-3xl shadow-xl p-8 max-w-4xl w-full">
-        <h1 class="text-4xl font-bold text-center mb-6 text-gray-800">Gerador de Slides com IA</h1>
-        <p class="text-center text-gray-600 mb-8">Digite um tópico abaixo e a IA criará o conteúdo de slides minimalistas para você.</p>
-
-        <!-- Formulário de entrada -->
-        <div class="mb-6">
-            <textarea
-                id="promptInput"
-                class="w-full h-32 p-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 resize-none text-gray-800"
-                placeholder="Ex: 'Introdução à Inteligência Artificial', 'A importância da energia solar'..."
-            ></textarea>
-        </div>
-
-        <!-- Botão e área de status -->
-        <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4 mb-8">
-            <button
-                id="generateBtn"
-                class="btn-primary bg-blue-600 text-white font-semibold py-3 px-8 rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-                Gerar Slides
-            </button>
-            <div id="statusMessage" class="flex items-center text-gray-500 font-medium">
-                <!-- Ícone de carregamento -->
-                <svg id="loadingIcon" class="hidden animate-spin h-5 w-5 mr-3 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span id="statusText"></span>
-            </div>
-        </div>
-
-        <!-- Botões de ação (Tela Cheia) -->
-        <div id="actionButtons" class="flex items-center justify-center mt-6">
-            <button
-                id="fullscreenBtn"
-                class="btn-primary bg-purple-600 text-white font-semibold py-2 px-6 rounded-full shadow-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 hidden"
-            >
-                Modo de Tela Cheia
-            </button>
-        </div>
-
-        <!-- Área de exibição dos slides -->
-        <div id="slidesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-            <!-- Slides gerados serão inseridos aqui -->
-        </div>
+    <div id="lock-screen" style="display: none;">
+        <h1>Acesso Bloqueado</h1>
+        <p>O período de teste do sistema expirou. Por favor, insira a senha de ativação para continuar.</p>
+        <input type="password" id="password-input" placeholder="Digite a senha">
+        <button onclick="checkPassword()">Acessar</button>
     </div>
 
-    <!-- Container para a visualização em tela cheia -->
-    <div id="fullscreen-view">
-        <div class="relative w-full h-full flex items-center justify-center">
-            <!-- Container para os botões de navegação, que irão aparecer e desaparecer -->
-            <div id="fullscreenControls" class="absolute inset-0 flex items-center justify-between transition-opacity duration-500">
-                <!-- Botões de navegação -->
-                <button id="prevBtn" class="absolute left-4 z-10 text-white bg-gray-800 rounded-full p-2 hover:bg-gray-700 focus:outline-none">
-                    <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                    </svg>
-                </button>
-                <button id="nextBtn" class="absolute right-4 z-10 text-white bg-gray-800 rounded-full p-2 hover:bg-gray-700 focus:outline-none">
-                    <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                    </svg>
-                </button>
-                <button id="exitFullscreenBtn" class="absolute top-4 right-4 z-20 text-white bg-gray-800 rounded-full p-2 hover:bg-gray-700 focus:outline-none">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-                <span id="slideCounter" class="absolute bottom-4 left-1/2 -translate-x-1/2 text-white bg-gray-800 rounded-full px-4 py-1"></span>
+    <div class="container">
+        <div class="card">
+            <h2>Seu Carrinho de Compras</h2>
+            
+            <div class="form-group">
+                <h3>Adicionar Item Manualmente</h3>
+                <div class="form-row">
+                    <input type="number" id="valor-livro-manual" placeholder="Valor de Venda" step="0.01">
+                    <select id="genero-livro-manual">
+                        <option value="" disabled selected>Selecione um Gênero</option>
+                    </select>
+                </div>
+                <div class="botoes-manual">
+                    <button id="add-manual-btn" onclick="adicionarLivroManual()">Adicionar Item</button>
+                    <button id="botao-imprimir-cupom" style="display: none;" onclick="imprimirCupomFiscal()">Imprimir Cupom</button>
+                </div>
             </div>
-            <div id="slides-carousel" class="relative w-full h-full flex items-center justify-center overflow-hidden">
-                <!-- Slides serão adicionados aqui dinamicamente -->
+
+            <ul id="carrinho-compras">
+            </ul>
+
+            <div class="form-group">
+                <h3>Gerenciar Cupom</h3>
+                <input type="text" id="cupom-id-input" placeholder="ID do Cupom">
+                <div class="botoes-manual">
+                    <button id="buscar-cupom-btn" onclick="buscarCupom()">Buscar Cupom</button>
+                    <button id="salvar-cupom-btn" onclick="salvarCupom()">Salvar Edições</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="lateral-panel">
+            <div class="card">
+                <div class="botoes-manual">
+                    <button id="update-btn" onclick="atualizarTotais()">Atualizar Totais</button>
+                </div>
+            
+                <div class="total-container">
+                    <p><strong>Resumo Final do Carrinho:</strong></p>
+                    <div class="total-display">
+                        <span>Troca Livro:</span> R$ <strong id="valor-total-troca">0.00</strong>
+                    </div>
+                    <div class="total-display">
+                        <span>Troca Geral:</span> R$ <strong id="valor-total-troca-reduzida">0.00</strong>
+                    </div>
+                    <div class="total-display">
+                        <span>Compra:</span> R$ <strong id="valor-total-compra">0.00</strong>
+                    </div>
+                    <div class="total-display">
+                        <span>Venda:</span> R$ <strong id="valor-total-venda">0.00</strong>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card" id="busca-amazon">
+                <h2>Pesquisar na Amazon</h2>
+                <input type="text" id="termo-pesquisa" placeholder="Nome ou código do livro">
+                <button id="amazon-search-btn" onclick="pesquisarNaAmazon()">Pesquisar</button>
+                <p id="instrucoes">Após a pesquisa, use o filtro "Condição" > "Usado" para ver os preços mais baixos.</p>
+            </div>
+
+            <div class="card promo-card">
+                <h3>Adquira a versão completa!</h3>
+                <p>O período de teste é limitado. Não perca tempo e garanta já o sistema completo para ter acesso a todos os recursos.</p>
+                <a href="https://williamnardelli37-beep.github.io/mealojavenda.github.io/" target="_blank" class="promo-btn">Comprar Agora</a>
+            </div>
+
+            <div class="card promo-card">
+                <h3>Sistema Exclusivo de Gestão</h3>
+                <p>Nossa versão completa oferece um painel de controle intuitivo e relatórios detalhados para otimizar suas vendas e estoque. Chega de anotações e perdas, invista em uma gestão profissional!</p>
+                <a href="https://williamnardelli37-beep.github.io/mealojavenda.github.io/" target="_blank" class="promo-btn">Saiba Mais</a>
             </div>
         </div>
     </div>
+    
+    <div id="floating-message" style="display: none;"></div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Seletores para os elementos do DOM
-            const promptInput = document.getElementById('promptInput');
-            const generateBtn = document.getElementById('generateBtn');
-            const statusMessage = document.getElementById('statusMessage');
-            const loadingIcon = document.getElementById('loadingIcon');
-            const statusText = document.getElementById('statusText');
-            const slidesContainer = document.getElementById('slidesContainer');
-            const fullscreenBtn = document.getElementById('fullscreenBtn');
-            const exitFullscreenBtn = document.getElementById('exitFullscreenBtn');
-            const fullscreenView = document.getElementById('fullscreen-view');
-            const slidesCarousel = document.getElementById('slides-carousel');
-            const prevBtn = document.getElementById('prevBtn');
-            const nextBtn = document.getElementById('nextBtn');
-            const slideCounter = document.getElementById('slideCounter');
-            const fullscreenControls = document.getElementById('fullscreenControls');
+        // --- CÓDIGO JAVASCRIPT ---
+        
+        // --- PORCENTAGENS DE CÁLCULO ---
+        const porcentagemTrocaLivro = 0.5; // 50%
+        const porcentagemTrocaGeral = 0.20; // 20%
+        const porcentagemCompra = 0.18;
+        
+        let idManualCounter = -1;
+        let carrinho = [];
+        const generosDisponiveis = [
+            "Auto Ajuda", "História", "Literatura Brasileira", "Ficção", "Infanto-Juvenil",
+            "Biografia", "Literatura Estrangeira", "Filosofia", "Romance", "Manga",
+            "Infantil", "HQ", "Gibis", "Revistas", "CDs", "LPs", "DVDs", "Psicologia",
+            "Religião", "Espírita"
+        ];
+        
+        let cuponsSalvos = JSON.parse(localStorage.getItem('cuponsSalvos')) || {};
 
-            // Sua chave de API real foi inserida aqui.
-            const API_KEY = "AIzaSyAjtMB4WF3FGFw9JHYDbbA7TaCGecO-Ync";
+        // Variáveis de Elementos DOM
+        const carrinhoElemento = document.getElementById('carrinho-compras');
+        const valorTotalVendaElemento = document.getElementById('valor-total-venda');
+        const valorTotalCompraElemento = document.getElementById('valor-total-compra');
+        const valorTotalTrocaElemento = document.getElementById('valor-total-troca');
+        const valorTotalTrocaReduzidaElemento = document.getElementById('valor-total-troca-reduzida');
+        const botaoImprimirCupom = document.getElementById('botao-imprimir-cupom');
+        const termoPesquisaInput = document.getElementById('termo-pesquisa');
+        const valorLivroManualInput = document.getElementById('valor-livro-manual');
+        const generoLivroManualSelect = document.getElementById('genero-livro-manual');
+        const cupomIdInput = document.getElementById('cupom-id-input');
+        const body = document.body;
+        const floatingMessage = document.getElementById('floating-message');
+        const lockScreen = document.getElementById('lock-screen');
+        const passwordInput = document.getElementById('password-input');
+        
+        // --- Sistema de Ativação por Tempo com Bloqueio ---
+        const DIAS_TESTE = 7;
+        const SENHA_ATIVAÇÃO = 'mundodasavaliacoes2025';
+
+        function checkSystemExpiration() {
+            let installationDate = localStorage.getItem('installationDate');
+            let isSystemActive = localStorage.getItem('isSystemActive') === 'true';
+
+            if (isSystemActive) {
+                // Sistema já ativado, não faz nada
+                return;
+            }
             
-            let slideData = []; // Armazena o conteúdo gerado
-            let currentSlideIndex = 0;
-            let controlsTimeout; // Variável para controlar o temporizador
+            if (!installationDate) {
+                installationDate = new Date().getTime();
+                localStorage.setItem('installationDate', installationDate);
+            }
 
-            // Temas de cores para os slides
-            const colorThemes = [
-                { bg: 'bg-blue-100', text: 'text-blue-900', border: 'border-blue-200' },
-                { bg: 'bg-green-100', text: 'text-green-900', border: 'border-green-200' },
-                { bg: 'bg-yellow-100', text: 'text-yellow-900', border: 'border-yellow-200' },
-                { bg: 'bg-purple-100', text: 'text-purple-900', border: 'border-purple-200' },
-                { bg: 'bg-red-100', text: 'text-red-900', border: 'border-red-200' }
-            ];
+            const now = new Date().getTime();
+            const elapsedDays = (now - installationDate) / (1000 * 60 * 60 * 24);
             
-            /**
-             * Função assíncrona para gerar e exibir os slides, chamando a API diretamente.
-             */
-            const generateSlides = async () => {
-                const prompt = promptInput.value.trim();
+            const daysLeft = Math.ceil(DIAS_TESTE - elapsedDays);
+            
+            if (elapsedDays >= DIAS_TESTE) {
+                lockScreen.style.display = 'flex';
+                floatingMessage.textContent = 'O período de teste expirou. Entre em contato para comprar o sistema.';
+                floatingMessage.style.display = 'block';
+            } else {
+                floatingMessage.textContent = `Seu período de teste expira em ${daysLeft} dia${daysLeft > 1 ? 's' : ''}.`;
+                floatingMessage.style.display = 'block';
+            }
+        }
+        
+        function checkPassword() {
+            if (passwordInput.value === SENHA_ATIVAÇÃO) {
+                localStorage.setItem('isSystemActive', 'true');
+                lockScreen.style.display = 'none';
+                floatingMessage.style.display = 'none';
+                alert('Sistema ativado com sucesso!');
+            } else {
+                alert('Senha incorreta. Por favor, tente novamente.');
+            }
+        }
+        
+        function gerarIdUnico() {
+            return 'CUP' + Math.random().toString(36).substr(2, 9).toUpperCase();
+        }
 
-                if (!prompt) {
-                    statusText.textContent = "Por favor, digite um tópico para gerar os slides.";
-                    return;
+        function preencherGenerosManuais() {
+            generosDisponiveis.sort().forEach(genero => {
+                const option = document.createElement('option');
+                option.value = genero;
+                option.textContent = genero;
+                generoLivroManualSelect.appendChild(option);
+            });
+        }
+        
+        function adicionarLivroManual() {
+            const precoVendaManual = parseFloat(valorLivroManualInput.value);
+            const generoManual = generoLivroManualSelect.value;
+            
+            if (isNaN(precoVendaManual) || precoVendaManual <= 0) {
+                alert("Por favor, preencha um valor de venda válido.");
+                return;
+            }
+            
+            if (!generoManual) {
+                alert("Por favor, selecione o gênero do item.");
+                return;
+            }
+
+            const valorTrocaLivro = precoVendaManual * porcentagemTrocaLivro;
+            const valorTrocaGeral = precoVendaManual * porcentagemTrocaGeral;
+            const valorCompraCalculado = precoVendaManual * porcentagemCompra;
+
+            const livroManual = {
+                id: idManualCounter--,
+                titulo: "Item Manual",
+                genero: generoManual,
+                codigoBarras: null,
+                precoVenda: precoVendaManual,
+                precoCompra: valorCompraCalculado,
+                valorTrocaLivro: valorTrocaLivro,
+                valorTrocaGeral: valorTrocaGeral,
+            };
+
+            carrinho.push(livroManual);
+            atualizarCarrinho();
+            
+            valorLivroManualInput.value = '';
+            generoLivroManualSelect.value = '';
+        }
+
+        function removerDoCarrinho(idDoLivro) {
+            carrinho = carrinho.filter(livro => livro.id !== idDoLivro);
+            atualizarCarrinho();
+        }
+
+        function atualizarValoresItem(idDoLivro, novoPrecoVenda) {
+            const novoPrecoVendaFloat = parseFloat(novoPrecoVenda);
+            if (isNaN(novoPrecoVendaFloat) || novoPrecoVendaFloat < 0) return;
+
+            const livroNoCarrinho = carrinho.find(livro => livro.id === idDoLivro);
+            if (livroNoCarrinho) {
+                livroNoCarrinho.precoVenda = novoPrecoVendaFloat;
+                livroNoCarrinho.precoCompra = novoPrecoVendaFloat * porcentagemCompra;
+                livroNoCarrinho.valorTrocaLivro = novoPrecoVendaFloat * porcentagemTrocaLivro;
+                livroNoCarrinho.valorTrocaGeral = novoPrecoVendaFloat * porcentagemTrocaGeral;
+
+                document.getElementById(`troca-livro-${livroNoCarrinho.id}`).textContent = livroNoCarrinho.valorTrocaLivro.toFixed(2);
+                document.getElementById(`troca-geral-${livroNoCarrinho.id}`).textContent = livroNoCarrinho.valorTrocaGeral.toFixed(2);
+                document.getElementById(`compra-${livroNoCarrinho.id}`).textContent = livroNoCarrinho.precoCompra.toFixed(2);
+            }
+        }
+        
+        function atualizarGeneroItem(idDoLivro, novoGenero) {
+            const livroNoCarrinho = carrinho.find(livro => livro.id === idDoLivro);
+            if (livroNoCarrinho) {
+                livroNoCarrinho.genero = novoGenero;
+            }
+        }
+
+        function atualizarTotais() {
+            let totalVenda = 0;
+            let totalCompra = 0;
+            let totalTrocaLivro = 0;
+            let totalTrocaGeral = 0;
+            
+            carrinho.forEach(livro => {
+                totalVenda += livro.precoVenda;
+                totalCompra += livro.precoCompra;
+                totalTrocaLivro += livro.valorTrocaLivro;
+                totalTrocaGeral += livro.valorTrocaGeral;
+            });
+
+            valorTotalVendaElemento.textContent = totalVenda.toFixed(2);
+            valorTotalCompraElemento.textContent = totalCompra.toFixed(2);
+            valorTotalTrocaElemento.textContent = totalTrocaLivro.toFixed(2);
+            valorTotalTrocaReduzidaElemento.textContent = totalTrocaGeral.toFixed(2);
+
+            if (carrinho.length > 0) {
+                botaoImprimirCupom.style.display = 'block';
+            } else {
+                botaoImprimirCupom.style.display = 'none';
+            }
+        }
+
+        function atualizarCarrinho() {
+            carrinhoElemento.innerHTML = '';
+            
+            carrinho.forEach(livro => {
+                const li = document.createElement('li');
+                li.className = 'carrinho-item';
+                li.innerHTML = `
+                    <div class="carrinho-info">
+                        <strong>${livro.titulo}</strong>
+                        <div class="carrinho-info-valor">
+                            <span>Gênero: </span>
+                            <select onchange="atualizarGeneroItem(${livro.id}, this.value)">
+                                ${generosDisponiveis.sort().map(genero => `<option value="${genero}" ${livro.genero === genero ? 'selected' : ''}>${genero}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="total-item-valores">
+                            <span>Valor de Troca Livro: R$ <strong id="troca-livro-${livro.id}">${livro.valorTrocaLivro.toFixed(2)}</strong></span>
+                            <span>Valor de Troca Geral: R$ <strong id="troca-geral-${livro.id}">${livro.valorTrocaGeral.toFixed(2)}</strong></span>
+                            <span>Valor de Compra: R$ <strong id="compra-${livro.id}">${livro.precoCompra.toFixed(2)}</strong></span>
+                        </div>
+                    </div>
+                    <div class="carrinho-info-valor">
+                        <span>Preço Venda: R$</span>
+                        <input type="number" id="input-carrinho-${livro.id}" class="manual-input" value="${livro.precoVenda.toFixed(2)}" step="0.01" onchange="atualizarValoresItem(${livro.id}, this.value); atualizarTotais()">
+                        <button class="remover" onclick="removerDoCarrinho(${livro.id})">Remover</button>
+                    </div>
+                `;
+                carrinhoElemento.appendChild(li);
+            });
+            atualizarTotais();
+        }
+
+        function pesquisarNaAmazon() {
+            const termoOriginal = termoPesquisaInput.value;
+            if (termoOriginal.trim() !== '') {
+                const url = `https://www.amazon.com.br/s?k=${encodeURIComponent(termoOriginal)}`;
+                window.open(url, '_blank');
+            } else {
+                alert("Por favor, digite o nome ou código do item para pesquisar.");
+            }
+        }
+        
+        function imprimirCupomFiscal() {
+            if (carrinho.length === 0) {
+                alert("O carrinho está vazio. Adicione itens para gerar o cupom.");
+                return;
+            }
+
+            const cupomId = gerarIdUnico();
+            const dataAtual = new Date().toLocaleString('pt-BR');
+            const totalVenda = parseFloat(valorTotalVendaElemento.textContent);
+            const totalCompra = parseFloat(valorTotalCompraElemento.textContent);
+            const totalTrocaLivro = parseFloat(valorTotalTrocaElemento.textContent);
+            const totalTrocaGeral = parseFloat(valorTotalTrocaReduzidaElemento.textContent);
+
+            cuponsSalvos[cupomId] = {
+                id: cupomId,
+                data: dataAtual,
+                itens: JSON.parse(JSON.stringify(carrinho)),
+                totais: {
+                    venda: totalVenda,
+                    compra: totalCompra,
+                    trocaLivro: totalTrocaLivro,
+                    trocaGeral: totalTrocaGeral
                 }
+            };
+            localStorage.setItem('cuponsSalvos', JSON.stringify(cuponsSalvos));
 
-                slidesContainer.innerHTML = '';
-                generateBtn.disabled = true;
-                generateBtn.textContent = 'Gerando...';
-                loadingIcon.classList.remove('hidden');
-                statusText.textContent = 'Aguarde, a IA está trabalhando...';
-                fullscreenBtn.classList.add('hidden');
-                slideData = []; // Limpa os dados de slides anteriores
-
-                try {
-                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
-                    const textPayload = {
-                        contents: [{
-                            parts: [
-                                { text: `Crie o conteúdo de slides minimalistas e menos detalhados com base no seguinte tópico: "${prompt}". Para cada slide, forneça um título e 1 a 2 pontos-chave. Separe cada slide com duas quebras de linha. Responda apenas com o texto, sem formatação extra como asteriscos ou cabeçalhos.` }
-                            ]
-                        }]
+            const itensAgrupadosPorGenero = carrinho.reduce((acc, item) => {
+                const genero = item.genero;
+                if (!acc[genero]) {
+                    acc[genero] = {
+                        count: 0,
+                        totalCompra: 0,
+                        totalTrocaLivro: 0,
+                        totalTrocaGeral: 0
                     };
-
-                    // Gera o texto dos slides
-                    const textResponse = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(textPayload)
-                    });
-
-                    if (!textResponse.ok) {
-                        throw new Error(`Erro ao gerar o texto dos slides.`);
-                    }
-
-                    const textResult = await textResponse.json();
-                    const responseText = textResult.candidates?.[0]?.content?.parts?.[0]?.text;
-
-                    if (!responseText) {
-                        statusText.textContent = 'A API não retornou conteúdo de texto. Tente um tópico diferente.';
-                        return;
-                    }
-
-                    const cleanedText = responseText.replace(/\*/g, '').trim();
-                    const slideContents = cleanedText.split('\n\n').filter(p => p.trim() !== '');
-
-                    if (slideContents.length === 0) {
-                        statusText.textContent = 'Nenhum slide foi gerado. Tente um tópico diferente.';
-                        return;
-                    }
-                    
-                    statusText.textContent = 'Texto gerado, agora exibindo os slides...';
-                    
-                    // Exibe os slides
-                    slideContents.forEach((content, index) => {
-                        const lines = content.split('\n');
-                        const title = lines[0] || `Slide ${index + 1}`;
-                        const body = lines.slice(1).join('\n');
-                        const theme = colorThemes[index % colorThemes.length];
-                        
-                        slideData.push({ title, body, theme });
-
-                        const slideElement = document.createElement('div');
-                        slideElement.className = `bg-gray-50 border border-gray-200 rounded-xl shadow-sm p-6 flex flex-col justify-between presentation-slide ${theme.bg} ${theme.text}`;
-                        slideElement.innerHTML = `
-                            <div class="mb-4 w-full h-full flex flex-col items-center justify-center text-center">
-                                <h3 class="text-3xl font-bold mb-4">${title}</h3>
-                                <div class="text-xl leading-relaxed whitespace-pre-wrap">${body}</div>
-                            </div>
-                        `;
-                        slidesContainer.appendChild(slideElement);
-                    });
-                    
-                    statusText.textContent = 'Slides gerados com sucesso!';
-                    fullscreenBtn.classList.remove('hidden');
-
-                } catch (error) {
-                    console.error('Erro na requisição:', error);
-                    statusText.textContent = `Erro: ${error.message}`;
-                    slidesContainer.innerHTML = `<div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert"><p class="font-bold">Erro</p><p>${error.message}</p></div>`;
-                } finally {
-                    generateBtn.disabled = false;
-                    generateBtn.textContent = 'Gerar Slides';
-                    loadingIcon.classList.add('hidden');
                 }
-            };
+                acc[genero].count++;
+                acc[genero].totalCompra += item.precoCompra;
+                acc[genero].totalTrocaLivro += item.valorTrocaLivro;
+                acc[genero].totalTrocaGeral += item.valorTrocaGeral;
+                return acc;
+            }, {});
 
-            // Função para esconder os controles
-            const hideControls = () => {
-                fullscreenControls.classList.add('controls-hidden');
-            };
+            let conteudoItens = '';
+            for (const genero in itensAgrupadosPorGenero) {
+                const grupo = itensAgrupadosPorGenero[genero];
+                conteudoItens += `
+                    <div class="cupom-item">
+                        <span>Gênero: ${genero} (${grupo.count} item${grupo.count > 1 ? 's' : ''})</span><br>
+                        <span>Troca Livro: R$ ${grupo.totalTrocaLivro.toFixed(2)}</span><br>
+                        <span>Troca Geral: R$ ${grupo.totalTrocaGeral.toFixed(2)}</span><br>
+                        <span>Compra: R$ ${grupo.totalCompra.toFixed(2)}</span>
+                    </div>
+                `;
+            }
 
-            // Função para mostrar os controles e iniciar o temporizador
-            const showControls = () => {
-                clearTimeout(controlsTimeout);
-                fullscreenControls.classList.remove('controls-hidden');
-                controlsTimeout = setTimeout(hideControls, 2000); // Esconde após 2 segundos de inatividade
+            let conteudoCupom = `
+                <style>
+                    body { 
+                        font-family: 'Poppins', sans-serif; 
+                        font-size: 12px;
+                        font-weight: bold;
+                    }
+                    .cupom-header { text-align: center; margin-bottom: 10px; }
+                    .cupom-header p { margin: 0; font-family: 'Poppins', monospace; }
+                    .cupom-item { border-bottom: 1px dotted #ccc; padding: 3px 0; }
+                    .cupom-total { border-top: 1px solid #000; margin-top: 10px; padding-top: 5px; }
+                    .cupom-total .linha { display: flex; justify-content: space-between; }
+                    .aviso { text-align: center; margin-top: 15px; font-size: 10px; }
+                    #barcode { display: block; margin: 10px auto; width: 100%; }
+                </style>
+                <div class="cupom-header">
+                    <p>LIVRARIA TESTE</p>
+                    <p>-----------------------------------</p>
+                    <p>CUPOM DE ENTRADA DE ITENS</p>
+                    <p>${dataAtual}</p>
+                    <p>-----------------------------------</p>
+                    <p><strong>CUPOM ID: ${cupomId}</strong></p>
+                    <svg id="barcode"></svg>
+                    <p>-----------------------------------</p>
+                </div>
+                <div>
+                    <p>Itens Recebidos</p>
+                    ${conteudoItens}
+                </div>
+                <div class="cupom-total">
+                    <div class="linha">
+                        <span>TROCA LIVRO:</span>
+                        <span>R$ ${valorTotalTrocaElemento.textContent}</span>
+                    </div>
+                    <div class="linha">
+                        <span>TROCA GERAL:</span>
+                        <span>R$ ${valorTotalTrocaReduzidaElemento.textContent}</span>
+                    </div>
+                    <div class="linha">
+                        <span>COMPRA:</span>
+                        <span>R$ ${valorTotalCompraElemento.textContent}</span>
+                    </div>
+                </div>
+                <div class="aviso">
+                    <p>OBRIGADO VOLTE SEMPRE</p>
+                </div>
+            `;
+
+            const printWindow = window.open('', '_blank', 'width=300,height=500');
+            printWindow.document.write(conteudoCupom);
+            printWindow.document.close();
+            
+            printWindow.onload = () => {
+                JsBarcode(printWindow.document.getElementById("barcode"), cupomId, {
+                    format: "CODE128",
+                    displayValue: false,
+                    width: 1,
+                    height: 20
+                });
+                printWindow.print();
             };
             
-            // Função para entrar no modo de tela cheia
-            const enterFullscreenMode = () => {
-                if (slideData.length === 0) return;
-                
-                slidesCarousel.innerHTML = '';
-                slideData.forEach((slide, index) => {
-                    const slideElement = document.createElement('div');
-                    slideElement.className = `fullscreen-slide absolute top-0 left-0 w-full p-20 flex-col items-center justify-center transition-all duration-500 ${slide.theme.bg} ${slide.theme.text}`;
-                    slideElement.style.display = 'none'; // Esconde todos os slides inicialmente
-                    
-                    slideElement.innerHTML = `
-                        <h2 class="text-6xl font-extrabold mb-8">${slide.title}</h2>
-                        <p class="text-3xl leading-relaxed whitespace-pre-wrap">${slide.body}</p>
-                    `;
-                    slidesCarousel.appendChild(slideElement);
-                });
-                
-                fullscreenView.style.display = 'flex';
-                currentSlideIndex = 0;
-                showCurrentSlide();
-                showControls(); // Exibe os controles e inicia o temporizador
-            };
+            carrinho = [];
+            atualizarCarrinho();
+        }
 
-            // Função para mostrar o slide atual
-            const showCurrentSlide = () => {
-                const slides = slidesCarousel.querySelectorAll('.fullscreen-slide');
-                slides.forEach((slide, index) => {
-                    slide.style.display = (index === currentSlideIndex) ? 'flex' : 'none';
-                });
-                slideCounter.textContent = `${currentSlideIndex + 1} de ${slideData.length}`;
-                prevBtn.disabled = currentSlideIndex === 0;
-                nextBtn.disabled = currentSlideIndex === slideData.length - 1;
-            };
+        function buscarCupom() {
+            const cupomId = cupomIdInput.value.trim().toUpperCase();
+            const cupom = cuponsSalvos[cupomId];
 
-            // Função para sair do modo de tela cheia
-            const exitFullscreenMode = () => {
-                fullscreenView.style.display = 'none';
-                clearTimeout(controlsTimeout); // Limpa o temporizador ao sair do modo
-            };
+            if (cupom) {
+                carrinho = JSON.parse(JSON.stringify(cupom.itens));
+                atualizarCarrinho();
+                alert(`Cupom ${cupomId} carregado com sucesso!`);
+            } else {
+                alert(`Cupom com ID "${cupomId}" não encontrado.`);
+            }
+        }
+        
+        function salvarCupom() {
+            const cupomId = cupomIdInput.value.trim().toUpperCase();
+            if (cuponsSalvos[cupomId]) {
+                cuponsSalvos[cupomId].itens = JSON.parse(JSON.stringify(carrinho));
+                cuponsSalvos[cupomId].totais.venda = parseFloat(valorTotalVendaElemento.textContent);
+                cuponsSalvos[cupomId].totais.compra = parseFloat(valorTotalCompraElemento.textContent);
+                cuponsSalvos[cupomId].totais.trocaLivro = parseFloat(valorTotalTrocaElemento.textContent);
+                cuponsSalvos[cupomId].totais.trocaGeral = parseFloat(valorTotalTrocaReduzidaElemento.textContent);
+                localStorage.setItem('cuponsSalvos', JSON.stringify(cuponsSalvos));
+                alert(`Alterações no Cupom ${cupomId} salvas com sucesso!`);
+            } else {
+                alert("Nenhum cupom para salvar. Por favor, busque um cupom primeiro.");
+            }
+        }
 
-            // Função para navegação entre slides
-            const handleNavigation = (direction) => {
-                if (direction === 'next' && currentSlideIndex < slideData.length - 1) {
-                    currentSlideIndex++;
-                } else if (direction === 'prev' && currentSlideIndex > 0) {
-                    currentSlideIndex--;
-                }
-                showCurrentSlide();
-            };
-
-            // Navegação por teclado
-            const handleKeyDown = (e) => {
-                if (fullscreenView.style.display === 'flex') {
-                    if (e.key === 'ArrowRight') {
-                        handleNavigation('next');
-                    } else if (e.key === 'ArrowLeft') {
-                        handleNavigation('prev');
-                    }
-                }
-            };
-
-            // Escutadores de eventos para interações do usuário
-            generateBtn.addEventListener('click', generateSlides);
-            fullscreenBtn.addEventListener('click', enterFullscreenMode);
-            exitFullscreenBtn.addEventListener('click', exitFullscreenMode);
-            prevBtn.addEventListener('click', () => handleNavigation('prev'));
-            nextBtn.addEventListener('click', () => handleNavigation('next'));
-            document.addEventListener('keydown', handleKeyDown);
-            
-            // Adiciona um listener de movimento do mouse para mostrar os controles
-            fullscreenView.addEventListener('mousemove', showControls);
-            fullscreenView.addEventListener('touchmove', showControls);
+        document.addEventListener('DOMContentLoaded', () => {
+            preencherGenerosManuais();
+            atualizarCarrinho();
+            checkSystemExpiration();
         });
     </script>
+    <div class="footer-text">
+        © 2025 M&A 7 dias Todos os direitos reservados. Por favor, compre essa versão nesse link: <a href="https://williamnardelli37-beep.github.io/mealojavenda.github.io/" target="_blank">https://williamnardelli37-beep.github.io/mealojavenda.github.io/</a>.
+    </div>
 </body>
 </html>
